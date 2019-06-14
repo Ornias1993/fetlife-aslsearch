@@ -180,7 +180,8 @@ function saveProfileData (sheet, data) {
  * Handler for the main search form.
  */
 function processSearchForm (form_object) {
-  return queryAllSpreadsheets(buildQuery(form_object), 'csv');
+  return GetFromDB (buildDSQLQuery(form_object));
+  //return queryAllSpreadsheets(buildQuery(form_object), 'csv');
 }
 
 /**
@@ -294,14 +295,20 @@ function buildQuery (params) {
           }
           query += ')';
           break;
-        case 'location':
-          var loc_cols = ['I', 'J', 'K'];
-          query += ' and (';
-          for (var i in loc_cols) {
-            query += loc_cols[i] + '="' + params[x] + '"';
-            if (i < loc_cols.length - 1) { query += ' or '; }
+        case 'location_locality':
+          if (params[x]) {
+            query += ' and I=' + " '" + params[x] + "'";
           }
-          query += ')';
+          break;
+        case 'location_region':
+          if (params[x]) {
+            query += ' and J=' + " '" + params[x] + "'";
+          }
+          break;
+        case 'location_country':
+          if (params[x]) {
+            query += ' and K=' + " '" + params[x] + "'";
+          }
           break;
         case 'user[type]':
           if (params[x]) {
@@ -321,6 +328,148 @@ function buildQuery (params) {
   if (params.offset) {
     query += ' offset ' + params.offset;
   }
+  Logger.log('Built query: ' + query);
+  return query;
+}
+
+function buildDSQLQuery (params) {
+  // always add "where C is not null" to the query to avoid getting inactive user IDs
+  var query = 'select User_ID, Nickname, Age, Gender, Role, Friend_Count, Paid_Account, Locality, Region, Country, Avatar_URL, Sexual_Orientation, Interest_Level_Active, Looking_For, Number_of_Pictures, Number_of_Videos FROM UserData where Nickname is not null';
+  for (var x in params) {
+    if (params[x]) {
+      switch (x) {
+        case 'nickname[search]':
+          query += ' and Nickname ' + params['nickname[operator]'] + " '" + params[x] + "'";
+          break;
+        case 'user[bio]':
+          query += ' and Bio_About_Me ' + params['user[bio][operator]'] + ' "' + params[x] + '"';
+          break;
+        case 'user[websites]':
+          query += ' and Websites ' + params['user[websites][operator]'] + ' "' + params[x] + '"';
+          break;
+        case 'user[fetishes_into]':
+          query += ' and Fetishes_Into ' + params['user[fetishes_into][operator]'] + ' "' + params[x] + '"';
+          break;
+        case 'user[fetishes_curious_about]':
+          query += ' and Fetishes_Curious_About ' + params['user[fetishes_curious_about][operator]'] + ' "' + params[x] + '"';
+          break;
+        case 'min_age':
+          query += ' and Age >= ' + params[x];
+          break;
+        case 'max_age':
+          query += ' and Age <= ' + params[x];
+          break;
+        case 'friends[count]':
+          query += ' and Friend_Count ' + params['friends[operator]'] + ' ' + params[x];
+          break;
+        case 'friends[exclude_zero]':
+          query += ' and Friend_Count != 0';
+          break;
+        case 'pictures[count]':
+          query += ' and Number_of_Pictures ' + params['pictures[operator]'] + ' ' + params[x];
+          break;
+        case 'pictures[exclude_zero]':
+          query += ' and Number_of_Pictures != 0';
+          break;
+        case 'videos[count]':
+          query += ' and Number_of_Videos ' + params['videos[operator]'] + ' ' + params[x];
+          break;
+        case 'videos[exclude_zero]':
+          query += ' and Number_of_Videos != 0';
+          break;
+        case 'user[sex]':
+          query += ' and (';
+          if ('object' === typeof(params[x])) {
+            for (var i in params[x]) {
+              query += 'E="' + params[x][i] + '"';
+              if (i < params[x].length - 1) { query += ' or '; }
+            }
+          } else {
+            query += 'E="' + params[x] + '"';
+          }
+          query += ')';
+          break;
+        case 'user[sexual_orientation]':
+          query += ' and (';
+          if ('object' === typeof(params[x])) {
+            for (var i in params[x]) {
+              query += 'M="' + params[x][i] + '"';
+              if (i < params[x].length - 1) { query += ' or '; }
+            }
+          } else {
+            query += 'M="' + params[x] + '"';
+          }
+          query += ')';
+          break;
+        case 'user[role]':
+          query += ' and (';
+          if ('object' === typeof(params[x])) {
+            for (var i in params[x]) {
+              query += 'F="' + params[x][i] + '"';
+              if (i < params[x].length - 1) { query += ' or '; }
+            }
+          } else {
+            query += 'F="' + params[x] + '"';
+          }
+          query += ')';
+          break;
+        case 'user[activity_level]':
+          query += ' and (';
+          if ('object' === typeof(params[x])) {
+            for (var i in params[x]) {
+              query += 'N="' + params[x][i] + '"';
+              if (i < params[x].length - 1) { query += ' or '; }
+            }
+          } else {
+            query += 'N="' + params[x] + '"';
+          }
+          query += ')';
+          break;
+        case 'user[looking_for]':
+          query += ' and (';
+          if ('object' === typeof(params[x])) {
+            for (var i in params[x]) {
+              query += 'O contains "' + params[x][i] + '"';
+              if (i < params[x].length - 1) { query += ' or '; }
+            }
+          } else {
+            query += 'O contains "' + params[x] + '"';
+          }
+          query += ')';
+          break;
+        case 'location_locality':
+          if (params[x]) {
+            query += ' and I=' + " '" + params[x] + "'";
+          }
+          break;
+        case 'location_region':
+          if (params[x]) {
+            query += ' and J=' + " '" + params[x] + "'";
+          }
+          break;
+        case 'location_country':
+          if (params[x]) {
+            query += ' and K=' + " '" + params[x] + "'";
+          }
+          break;
+        case 'user[type]':
+          if (params[x]) {
+            query += ' and H=' + params[x];
+          }
+          break;
+//        // TODO:
+//        case 'user[vanilla_relationships]':
+//          if (params[x]) {
+//            query += ' and P ' + params[x];
+//          }
+//          break;
+      }
+    }
+  }
+  //query += ' limit ' + params.limit;
+  //if (params.offset) {
+  //  query += ' offset ' + params.offset;
+  //}
   Logger.log('Built query: ' + query);
   return query;
 }

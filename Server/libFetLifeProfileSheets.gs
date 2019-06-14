@@ -314,6 +314,7 @@ function queryAllSpreadsheets (query, format) {
         break;
     }
   }
+  console.log(result);
   return result;
 }
 
