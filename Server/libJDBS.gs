@@ -21,9 +21,17 @@ function GetFromDB (query){
   stmt.setMaxRows(500);
   console.log(query);
   var results = stmt.executeQuery(query);
-  var numCols = results.getMetaData().getColumnCount();
+  var meta = results.getMetaData();
+  var numCols = meta.getColumnCount();
 
-  var resultsArray = [["User ID", "Nickname", "Age", "Gender", "Role", "Friend Count", "Paid Account?", "Locality", "Region", "Country", "Avatar URL", "Sexual Orientation", "Interest Level (&quot;Active&quot;)", "Looking For", "Number of Pictures", "Number of Videos"]];
+  var resultsArray = [[]];
+
+  // The column count starts from 1
+  for (var i = 1; i <= numCols; i++ ) {
+  // Do stuff with name
+  resultsArray[0].push(meta.getColumnName(i));
+  }
+
   var count = 1;
   while(results.next()) {
       resultsArray.push([]);
@@ -56,3 +64,32 @@ function GetFromDB (query){
   Logger.log('Time elapsed: %sms', end - start);
   return resultsArray
 }
+
+function UpdateToDB(id, col, key) {
+  if(key != "" && key != null){
+    var sql = "update UserData set " + col + "= \"" + key + "\" where User_ID= " + id;
+  }
+  else{
+    var sql = "update UserData set " + col + "= NULL where User_ID= " + id;
+  }
+      
+    console.log("update attempt: " + sql);
+      var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+      var start = new Date();
+      var stmt = conn.createStatement();
+      stmt.executeUpdate(sql);
+      
+
+  }
+
+function mysql_real_escape_string (str) {
+     return str
+        .replace("\\", "\\\\")
+        .replace("\'", "\\\'")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\\n")
+        .replace("\r", "\\\r")
+        .replace("\x00", "\\\x00")
+        .replace("\x1a", "\\\x1a");
+}
+

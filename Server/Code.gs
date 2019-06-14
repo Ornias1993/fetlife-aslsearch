@@ -29,22 +29,8 @@ function doPost (e) {
   }
   for (var profile in profiles) {
     var profile_data = validateScraperInput(profiles[profile]);
-    var volume_number = lookupVolumeNumberByUserId(profile_data.user_id);
-    if (isNaN(volume_number)) {
-      debugLog('Volume number for user ID ' + profile_data.user_id + ' is NaN, skipping.');
-      continue;
-    }
-    var ss_id = getSpreadsheetIdByVolumeNumber(volume_number);
-    var ss;
-    try {
-      ss = SpreadsheetApp.openById(ss_id);
-    } catch (ex) {
-      debugLog('No spreadsheet with ID ' + ss_id + ', creating a new one');
-      ss = createSpreadsheetForVolume(volume_number);
-    }
-    sheet = ss.getSheetByName(CONFIG.db_sheet_name);
-    var result = saveProfileData(sheet, profile_data);
-    result.coords.vol = volume_number;
+    var result = saveProfileData(profile_data);
+
     response.push(result);
   }
   return ContentService.createTextOutput(JSON.stringify(response))
@@ -59,7 +45,12 @@ function doPost (e) {
  */
 function validateScraperInput (obj) {
   var safe_obj = {};
+  
   for (var k in obj) {
+    if(typeof obj[k] == 'string'){
+      mysql_real_escape_string(obj[k]);
+    } 
+    
     switch (k) {
       case 'user_id':
       case 'age':
@@ -134,8 +125,8 @@ function doQuery (e) {
  * @param {Object} data An object with named properties to add to the sheet.
  * @return {Object}
  */
-function saveProfileData (sheet, data) {
-  // Prepare cell values.
+function saveProfileData (data) {
+  /** Prepare cell values.
   for (var key in data) {
     if (data[key] instanceof Array) {
       if (0 === data[key].length) { data[key] = ''; }
@@ -144,29 +135,44 @@ function saveProfileData (sheet, data) {
         data[key] = "'" + data[key].join(',');
       }
     }
-  }
+  }*/
 
   // Lookup the destination coordinates of the data POST'ed to us.
   // TODO: Can this be optimized without losing per-cell precision?
-  var row_index = lookupRowByUserId(sheet, data.user_id);
-  if (!row_index) {
-    row_index = sheet.getLastRow() + 1;
+  
+
+  var row_index = GetFromDB ("SELECT User_ID FROM UserData where User_ID= " + data.user_id)
+//if not already here, dont update, add new
+  if (!row_index[1]) {
+    //create new row here
+    console.log("no such thing");
   }
-  var range = sheet.getRange(row_index, 1);
-  range.setValue(Date.now()); // update the last scrape time
+
+  else {
+
+  
+    
+ 
+  //var range = sheet.getRange(row_index, 1);
+  //range.setValue(Date.now()); // update the last scrape time
+  
+
+  //creates list of data to write away
   var cols = [];
   for (var key in data) {
-    var col_name = CONFIG.Fields.headings_nicename[CONFIG.Fields.headings.indexOf(key)];
-    var col_index = lookupColumnByName(sheet, col_name);
+    //var col_name = CONFIG.Fields.headings_nicename[CONFIG.Fields.headings.indexOf(key)];
+    console.log("Output: " + key + " " + data[key]);
+    UpdateToDB(data.user_id, key, data[key])
+    
+/**     
     cols.push(col_index);
-    debugLog(
-      'Writing cell value to spreadsheet '
-      + sheet.getParent().getId() + ' at ' + row_index + ',' + col_index
-      + ' ("' + key + '" : "' + data[key] + '")'
-    );
+
     range = sheet.getRange(row_index, col_index);
     range.setValue(data[key]);
-  }
+     */ 
+    }
+
+  
   return {
     'status': "ok",
     'coords': {
@@ -174,6 +180,8 @@ function saveProfileData (sheet, data) {
       'col': cols
     }
   };
+
+  }
 }
 
 /**
