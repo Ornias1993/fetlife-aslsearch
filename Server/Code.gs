@@ -339,20 +339,50 @@ function buildDSQLQuery (params) {
     if (params[x]) {
       switch (x) {
         case 'nickname[search]':
-          query += ' and Nickname ' + params['nickname[operator]'] + " '" + params[x] + "'";
+          if(params['nickname[operator]'] == "matches"){
+          query += " and Nickname= '" + params[x] + "'";
           break;
+          }
+          else{
+          query += ' and Nickname ' + params['nickname[operator]'] + ' "' + params[x] + '"';
+          break
+          }
         case 'user[bio]':
-          query += ' and Bio_About_Me ' + params['user[bio][operator]'] + ' "' + params[x] + '"';
+          if(params['Bio_About_Me[operator]'] == "matches"){
+          query += " Bio_About_Me= '" + params[x] + "'";
           break;
+          }
+          else{
+          query += ' and Bio_About_Me ' + params['user[bio][operator]'] + ' "' + params[x] + '"';
+          break
+          }
         case 'user[websites]':
+          if(params['Websites[operator]'] == "matches"){
+          query += " Websites= '" + params[x] + "'";
+          break;
+          }
+          else{
           query += ' and Websites ' + params['user[websites][operator]'] + ' "' + params[x] + '"';
           break;
+          }
         case 'user[fetishes_into]':
+          if(params['Fetishes_Into[operator]'] == "matches"){
+          query += " Fetishes_Into= '" + params[x] + "'";
+          break;
+          }
+          else{
           query += ' and Fetishes_Into ' + params['user[fetishes_into][operator]'] + ' "' + params[x] + '"';
           break;
+          }
         case 'user[fetishes_curious_about]':
-          query += ' and Fetishes_Curious_About ' + params['user[fetishes_curious_about][operator]'] + ' "' + params[x] + '"';
+          if(params['Fetishes_Curious_About[operator]'] == "matches"){
+          query += " Fetishes_Curious_About= '" + params[x] + "'";
           break;
+          }
+          else{
+          query += ' and Fetishes_Curious_About ' + params['user[fetishes_curious_about][operator]'] + ' "' + params[x] + '"';
+          break
+          }
         case 'min_age':
           query += ' and Age >= ' + params[x];
           break;
@@ -381,11 +411,11 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'E="' + params[x][i] + '"';
+              query += 'Gender="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'E="' + params[x] + '"';
+            query += 'Gender="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -393,11 +423,11 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'M="' + params[x][i] + '"';
+              query += 'Sexual_Orientation="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'M="' + params[x] + '"';
+            query += 'Sexual_Orientation="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -405,11 +435,11 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'F="' + params[x][i] + '"';
+              query += 'Role="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'F="' + params[x] + '"';
+            query += 'Role="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -417,11 +447,11 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'N="' + params[x][i] + '"';
+              query += 'Interest_Level_Active="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'N="' + params[x] + '"';
+            query += 'Interest_Level_Active="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -429,32 +459,32 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'O contains "' + params[x][i] + '"';
+              query += 'Looking_For= "' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'O contains "' + params[x] + '"';
+            query += 'Looking_For= "' + params[x] + '"';
           }
           query += ')';
           break;
         case 'location_locality':
           if (params[x]) {
-            query += ' and I=' + " '" + params[x] + "'";
+            query += ' and Locality=' + " '" + params[x] + "'";
           }
           break;
         case 'location_region':
           if (params[x]) {
-            query += ' and J=' + " '" + params[x] + "'";
+            query += ' and Region=' + " '" + params[x] + "'";
           }
           break;
         case 'location_country':
           if (params[x]) {
-            query += ' and K=' + " '" + params[x] + "'";
+            query += ' and Country=' + " '" + params[x] + "'";
           }
           break;
         case 'user[type]':
           if (params[x]) {
-            query += ' and H=' + params[x];
+            query += ' and Paid_Account=' + params[x];
           }
           break;
 //        // TODO:
@@ -466,10 +496,6 @@ function buildDSQLQuery (params) {
       }
     }
   }
-  //query += ' limit ' + params.limit;
-  //if (params.offset) {
-  //  query += ' offset ' + params.offset;
-  //}
   Logger.log('Built query: ' + query);
   return query;
 }

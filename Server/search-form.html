@@ -245,9 +245,6 @@
         <fieldset class="text-fields"><legend>Nickname</legend>
           <p>
             <select name="nickname[operator]">
-              <option value="contains">contains</option>
-              <option value="starts with">starts with</option>
-              <option value="ends with">ends with</option>
               <option value="matches">matches (regular expression)</option>
               <option value="like">like (SQL-wildcards)</option>
             </select>
@@ -257,9 +254,6 @@
         <fieldset class="text-fields"><legend>"About Me"</legend>
           <p>
             <select name="user[bio][operator]">
-              <option value="contains">contains</option>
-              <option value="starts with">starts with</option>
-              <option value="ends with">ends with</option>
               <option value="matches">matches (regular expression)</option>
               <option value="like">like (SQL-wildcards)</option>
             </select>
@@ -269,9 +263,6 @@
         <fieldset class="text-fields"><legend>Website</legend>
           <p>
             <select name="user[websites][operator]">
-              <option value="contains">contains</option>
-              <option value="starts with">starts with</option>
-              <option value="ends with">ends with</option>
               <option value="matches">matches (regular expression)</option>
               <option value="like">like (SQL-wildcards)</option>
             </select>
@@ -281,9 +272,6 @@
         <fieldset class="text-fields"><legend>Fetishes into</legend>
           <p>
             <select name="user[fetishes_into][operator]">
-              <option value="contains">contains</option>
-              <option value="starts with">starts with</option>
-              <option value="ends with">ends with</option>
               <option value="matches">matches (regular expression)</option>
               <option value="like">like (SQL-wildcards)</option>
             </select>
@@ -293,9 +281,6 @@
         <fieldset class="text-fields"><legend>Fetishes curious about</legend>
           <p>
             <select name="user[fetishes_curious_about][operator]">
-              <option value="contains">contains</option>
-              <option value="starts with">starts with</option>
-              <option value="ends with">ends with</option>
               <option value="matches">matches (regular expression)</option>
               <option value="like">like (SQL-wildcards)</option>
             </select>
@@ -412,10 +397,11 @@
                           search to include or exclude these members."
             >Help</a>
           <p>
+          <!-- There are some issues with SQL transition and booleans, needs some attention after transition -->
             <label>Search <select name="user[type]">
                 <option value="">all accounts</option>
-                <option value="true">only paid accounts</option>
-                <option value="false">only free accounts</option>
+                <option value="TRUE">only paid accounts</option>
+                <option value="FALSE">only free accounts</option>
             </select>.</label>
           </p>
         </fieldset>
