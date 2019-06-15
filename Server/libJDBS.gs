@@ -6,18 +6,24 @@
  * @author <a href="https://github.com/Ornias1993">Ornias1993</a>
  */
 
-var dbUrl = 'jdbc:mysql://' + CONFIG.SQLconnectionName + '/' + CONFIG.SQLdb;
+//Global SQL Config
+
+var connectionName = 'sql7.freesqldatabase.com:3306';
+var user = 'sql7295537';
+var userPwd = '8mI76qvWm6';
+var db = 'sql7295537';
+var dbUrl = 'jdbc:mysql://' + connectionName + '/' + db;
 
 /**
  * Read up to 1000 rows of data from the table and log them.
  */
 function GetFromDB (query){
-  var conn = Jdbc.getConnection(dbUrl, CONFIG.SQLuser, CONFIG.SQLuserPwd);
+  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
 
   var start = new Date();
   var stmt = conn.createStatement();
   stmt.setMaxRows(500);
-  console.log(query);
+  console.log("Searching for: " + query);
   var results = stmt.executeQuery(query);
   var meta = results.getMetaData();
   var numCols = meta.getColumnCount();
@@ -44,17 +50,6 @@ function GetFromDB (query){
 
 
   }
-    console.log(resultsArray);
-/** old
-  while (results.next()) {
-    var rowString = '';
-    for (var col = 0; col < numCols; col++) {
-      rowString += results.getString(col + 1) + '\t';
-    }
-    Logger.log(rowString);
-  }
-  console.log(rowString);
-*/
   results.close();
   stmt.close();
 
@@ -82,7 +77,7 @@ function UpdateToDB(id, keys) {
   idloc++;
 
   // Connect to database and create a prepared statement using the column string created earlier
-  var conn = Jdbc.getConnection(dbUrl, CONFIG.SQLuser, CONFIG.SQLuserPwd);
+  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
   var start = new Date();
   var stmt = conn.prepareStatement("update UserData set " + cols + " where user_id = ?");
 
@@ -115,8 +110,7 @@ function UpdateToDB(id, keys) {
 
     //Execute and clossed
     stmt.executeUpdate();
-    stmt.close();
- // console.log("connclosed");
+    stmt.close()
 
  // return the ID of the processed user
  return id
@@ -141,7 +135,7 @@ function InsertToDB(id, keys) {
   vals = vals.replace(/,\s*$/, "");
 
   // Connect to database and create a prepared statement using the column string created earlier
-  var conn = Jdbc.getConnection(dbUrl, CONFIG.SQLuser, CONFIG.SQLuserPwd);
+  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
   var start = new Date();
   var stmt = conn.prepareStatement("INSERT INTO UserData (" + cols + ") VALUE (" + vals + ")");
 
@@ -173,10 +167,8 @@ function InsertToDB(id, keys) {
     //Execute and clossed
     stmt.executeUpdate();
     stmt.close();
- // console.log("connclosed");
 
  // return the ID of the processed user
- console.log("Added to DB");
  return id
 
   }

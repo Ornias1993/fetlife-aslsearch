@@ -10,12 +10,6 @@
 var CONFIG = {};
 CONFIG.debug = true;
 
-//SQL Connection Config
-CONFIG.SQLconnectionName = 'sql7.freesqldatabase.com:3306';
-CONFIG.SQLuser = 'sql7295537';
-CONFIG.SQLuserPwd = '8mI76qvWm6';
-CONFIG.SQLdb = 'sql7295537';
-
 //List of used headings
 CONFIG.Fields = {
   // The order of the elements of this array may matter.

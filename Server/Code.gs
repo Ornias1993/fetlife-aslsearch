@@ -29,6 +29,7 @@ function doPost (e) {
   for (var profile in profiles) {
     var profile_data = validateScraperInput(profiles[profile]);
     var result = saveProfileData(profile_data);
+    console.log(result);
 
     response.push(result);
   }
@@ -126,22 +127,15 @@ function saveProfileData (data) {
  */
 
 function requestInsert(data){
-  //create new row here
-  console.log("no such thing");
-    
-
-  
   var toInsert = [[]];
   toInsert.push([]);
 
   //creates array of data to write away
   for (var key in data) {
-    console.log("Output: " + key + " " + data[key]);
     toInsert[0].push(key);
     toInsert[1].push(data[key]);
     
     }
-    console.log("data in toInsert: " + toInsert[1][1]);
   var response = InsertToDB(data.user_id, toInsert);
     
   return {
@@ -156,18 +150,14 @@ function requestInsert(data){
  */
 
 function requestUpdate(data){
-
-  
   var toUpdate = [[]];
   toUpdate.push([]);
   //creates list of data to write away
   for (var key in data) {
-    console.log("Output: " + key + " " + data[key]);
     toUpdate[0].push(key);
     toUpdate[1].push(data[key]);
     
     }
-    console.log("data in toUpdate: " + toUpdate[1][1]);
   var response = UpdateToDB(data.user_id, toUpdate);
   
 
@@ -189,88 +179,88 @@ function processSearchForm (form_object) {
  */
 function buildDSQLQuery (params) {
   // always add "where C is not null" to the query to avoid getting inactive user IDs
-  var query = 'select User_ID, Nickname, Age, Gender, Role, Friend_Count, Paid_Account, Locality, Region, Country, Avatar_URL, Sexual_Orientation, Interest_Level_Active, Looking_For, Number_of_Pictures, Number_of_Videos FROM UserData where Nickname is not null';
+  var query = 'select user_id, nickname, age, gender, role, friend_count, paid_account, location_locality, location_region, location_country, avatar_url, sexual_orientation, interest_level, looking_for, num_pics, num_vids FROM UserData where nickname is not null';
   for (var x in params) {
     if (params[x]) {
       switch (x) {
         case 'nickname[search]':
           if(params['nickname[operator]'] == "matches"){
-          query += " and Nickname= '" + params[x] + "'";
+          query += " and nickname= '" + params[x] + "'";
           break;
           }
           else{
-          query += ' and Nickname ' + params['nickname[operator]'] + ' "' + params[x] + '"';
+          query += ' and nickname ' + params['nickname[operator]'] + ' "' + params[x] + '"';
           break
           }
         case 'user[bio]':
-          if(params['Bio_About_Me[operator]'] == "matches"){
-          query += " Bio_About_Me= '" + params[x] + "'";
+          if(params['bio[operator]'] == "matches"){
+          query += " bio= '" + params[x] + "'";
           break;
           }
           else{
-          query += ' and Bio_About_Me ' + params['user[bio][operator]'] + ' "' + params[x] + '"';
+          query += ' and bio ' + params['user[bio][operator]'] + ' "' + params[x] + '"';
           break
           }
         case 'user[websites]':
-          if(params['Websites[operator]'] == "matches"){
-          query += " Websites= '" + params[x] + "'";
+          if(params['websites[operator]'] == "matches"){
+          query += " websites= '" + params[x] + "'";
           break;
           }
           else{
-          query += ' and Websites ' + params['user[websites][operator]'] + ' "' + params[x] + '"';
+          query += ' and websites ' + params['user[websites][operator]'] + ' "' + params[x] + '"';
           break;
           }
         case 'user[fetishes_into]':
-          if(params['Fetishes_Into[operator]'] == "matches"){
-          query += " Fetishes_Into= '" + params[x] + "'";
+          if(params['fetishes_into[operator]'] == "matches"){
+          query += " fetishes_into= '" + params[x] + "'";
           break;
           }
           else{
-          query += ' and Fetishes_Into ' + params['user[fetishes_into][operator]'] + ' "' + params[x] + '"';
+          query += ' and fetishes_into ' + params['user[fetishes_into][operator]'] + ' "' + params[x] + '"';
           break;
           }
         case 'user[fetishes_curious_about]':
-          if(params['Fetishes_Curious_About[operator]'] == "matches"){
-          query += " Fetishes_Curious_About= '" + params[x] + "'";
+          if(params['fetishes_curious_about[operator]'] == "matches"){
+          query += " fetishes_curious_about= '" + params[x] + "'";
           break;
           }
           else{
-          query += ' and Fetishes_Curious_About ' + params['user[fetishes_curious_about][operator]'] + ' "' + params[x] + '"';
+          query += ' and fetishes_curious_about ' + params['user[fetishes_curious_about][operator]'] + ' "' + params[x] + '"';
           break
           }
         case 'min_age':
-          query += ' and Age >= ' + params[x];
+          query += ' and age >= ' + params[x];
           break;
         case 'max_age':
-          query += ' and Age <= ' + params[x];
+          query += ' and age <= ' + params[x];
           break;
         case 'friends[count]':
-          query += ' and Friend_Count ' + params['friends[operator]'] + ' ' + params[x];
+          query += ' and friend_count ' + params['friend_count[operator]'] + ' ' + params[x];
           break;
         case 'friends[exclude_zero]':
-          query += ' and Friend_Count != 0';
+          query += ' and friend_count != 0';
           break;
         case 'pictures[count]':
-          query += ' and Number_of_Pictures ' + params['pictures[operator]'] + ' ' + params[x];
+          query += ' and num_pics ' + params['num_pics[operator]'] + ' ' + params[x];
           break;
         case 'pictures[exclude_zero]':
-          query += ' and Number_of_Pictures != 0';
+          query += ' and num_pics != 0';
           break;
         case 'videos[count]':
-          query += ' and Number_of_Videos ' + params['videos[operator]'] + ' ' + params[x];
+          query += ' and num_vids ' + params['num_vids[operator]'] + ' ' + params[x];
           break;
         case 'videos[exclude_zero]':
-          query += ' and Number_of_Videos != 0';
+          query += ' and num_vids != 0';
           break;
         case 'user[sex]':
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'Gender="' + params[x][i] + '"';
+              query += 'gender="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'Gender="' + params[x] + '"';
+            query += 'gender="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -278,11 +268,11 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'Sexual_Orientation="' + params[x][i] + '"';
+              query += 'sexual_orientation="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'Sexual_Orientation="' + params[x] + '"';
+            query += 'sexual_orientation="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -290,11 +280,11 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'Role="' + params[x][i] + '"';
+              query += 'role="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'Role="' + params[x] + '"';
+            query += 'role="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -302,11 +292,11 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'Interest_Level_Active="' + params[x][i] + '"';
+              query += 'interest_level="' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'Interest_Level_Active="' + params[x] + '"';
+            query += 'interest_level="' + params[x] + '"';
           }
           query += ')';
           break;
@@ -314,32 +304,32 @@ function buildDSQLQuery (params) {
           query += ' and (';
           if ('object' === typeof(params[x])) {
             for (var i in params[x]) {
-              query += 'Looking_For= "' + params[x][i] + '"';
+              query += 'looking_for= "' + params[x][i] + '"';
               if (i < params[x].length - 1) { query += ' or '; }
             }
           } else {
-            query += 'Looking_For= "' + params[x] + '"';
+            query += 'looking_for= "' + params[x] + '"';
           }
           query += ')';
           break;
         case 'location_locality':
           if (params[x]) {
-            query += ' and Locality=' + " '" + params[x] + "'";
+            query += ' and location_locality=' + " '" + params[x] + "'";
           }
           break;
         case 'location_region':
           if (params[x]) {
-            query += ' and Region=' + " '" + params[x] + "'";
+            query += ' and location_region=' + " '" + params[x] + "'";
           }
           break;
         case 'location_country':
           if (params[x]) {
-            query += ' and Country=' + " '" + params[x] + "'";
+            query += ' and location_country=' + " '" + params[x] + "'";
           }
           break;
         case 'user[type]':
           if (params[x]) {
-            query += ' and Paid_Account=' + params[x];
+            query += ' and paid_account=' + params[x];
           }
           break;
 //        // TODO:
