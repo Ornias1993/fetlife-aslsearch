@@ -1,20 +1,18 @@
 /**
- * Replace the variables in this block with real values.
- * You can find the "Instance connection name" in the Google Cloud
- * Platform Console, on the instance Overview page.
+ * FetLife Profile Sheets
+ *
+ * This file provides Utility functions to connect to a SQL database.
+ *
+ * @author <a href="https://github.com/Ornias1993">Ornias1993</a>
  */
-var connectionName = 'sql7.freesqldatabase.com:3306';
-var user = 'sql7295537';
-var userPwd = '8mI76qvWm6';
-var db = 'sql7295537';
 
-var dbUrl = 'jdbc:mysql://' + connectionName + '/' + db;
+var dbUrl = 'jdbc:mysql://' + CONFIG.SQLconnectionName + '/' + CONFIG.SQLdb;
 
 /**
  * Read up to 1000 rows of data from the table and log them.
  */
 function GetFromDB (query){
-  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+  var conn = Jdbc.getConnection(dbUrl, CONFIG.SQLuser, CONFIG.SQLuserPwd);
 
   var start = new Date();
   var stmt = conn.createStatement();
@@ -84,7 +82,7 @@ function UpdateToDB(id, keys) {
   idloc++;
 
   // Connect to database and create a prepared statement using the column string created earlier
-  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+  var conn = Jdbc.getConnection(dbUrl, CONFIG.SQLuser, CONFIG.SQLuserPwd);
   var start = new Date();
   var stmt = conn.prepareStatement("update UserData set " + cols + " where user_id = ?");
 
@@ -143,7 +141,7 @@ function InsertToDB(id, keys) {
   vals = vals.replace(/,\s*$/, "");
 
   // Connect to database and create a prepared statement using the column string created earlier
-  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+  var conn = Jdbc.getConnection(dbUrl, CONFIG.SQLuser, CONFIG.SQLuserPwd);
   var start = new Date();
   var stmt = conn.prepareStatement("INSERT INTO UserData (" + cols + ") VALUE (" + vals + ")");
 

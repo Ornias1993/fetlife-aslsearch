@@ -1,8 +1,7 @@
 /**
  * FetLife ASL Search Server
  *
- * @author <a href="https://maybemaimed.com/tag/fetlife/">maymay</a>
- * @author2 <a href="https://github.com/Ornias1993">Ornias1993</a>
+ * @author <a href="https://github.com/Ornias1993">Ornias1993</a>
  */
 
 
@@ -89,52 +88,48 @@ function validateScraperInput (obj) {
  * @return {TextOutput} A TextOutput object with the appropriate MIME type.
  */
 function doQuery (e) {
-  e.parameter.tq = e.parameter.tq || '';
-  e.parameter.prefix = e.parameter.prefix || 'google.visualization.Query.setResponse';
-  var result = queryAllSpreadsheets(e.parameter.tq, e.parameter.format);
-
-  var output;
-  switch (e.parameter.format) {
-    case 'csv':
-      output = ContentService.createTextOutput();
-      for (row in result) {
-        for (cell in result[row]) {
-          result[row][cell] = '"' + result[row][cell].replace(/"/g, '\\"') + '"';
-        }
-        output.append(result[row].join(',') + "\n");
-      }
-      output.setMimeType(ContentService.MimeType.CSV).downloadAsFile('data.csv');
-    break;
-    case 'json':
-      output = ContentService.createTextOutput(JSON.stringify(result))
-          .setMimeType(ContentService.MimeType.JSON);
-      break;
-    case 'jsonp':
-    default:
-      output = ContentService.createTextOutput(e.parameter.prefix + '(' + JSON.stringify(result) + ');')
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    break;
-  }
+  //Depricated, needs to be remade almost completely
   return output;
 }
 
 /**
- * Adds data to a spreadsheet.
+ * Adds data the Database.
  *
- * @param {Sheet} sheet The Google Sheet to add data to.
- * @param {Object} data An object with named properties to add to the sheet.
+ * @param {Object} data An object with named properties.
  * @return {Object}
  */
 function saveProfileData (data) {
-
+  // check if userentry already exists
   var row_index = GetFromDB ("SELECT User_ID FROM UserData where User_ID= " + data.user_id)
+  
   //if not already here, dont update, add new
   if (!row_index[1]) {
+  var insert = requestInsert(data);
+  return insert
+  }
+
+  else if (row_index[1]) {
+  var update = requestUpdate(data);
+  return update
+  }
+
+  else{
+   return {
+    'DB_Response': "Cant Process",
+    'for_User' : data.user_id
+  };
+}
+}
+
+/**
+ * Creates an Array from scraperdata to send to SQL Insert processor
+ */
+
+function requestInsert(data){
   //create new row here
   console.log("no such thing");
     
-  //var range = sheet.getRange(row_index, 1);
-  //range.setValue(Date.now()); // update the last scrape time
+
   
   var toInsert = [[]];
   toInsert.push([]);
@@ -153,25 +148,20 @@ function saveProfileData (data) {
     'DB_Response': "Added",
     'for_User' : response
   };
+}
 
-    
-    
-    
-  }
 
-  else if (row_index[1]) {
+/**
+ * Creates an Array from scraperdata to send to SQL Update processor
+ */
 
-  
-    
- 
-  //var range = sheet.getRange(row_index, 1);
-  //range.setValue(Date.now()); // update the last scrape time
+function requestUpdate(data){
+
   
   var toUpdate = [[]];
   toUpdate.push([]);
   //creates list of data to write away
   for (var key in data) {
-    //var col_name = CONFIG.Fields.headings_nicename[CONFIG.Fields.headings.indexOf(key)];
     console.log("Output: " + key + " " + data[key]);
     toUpdate[0].push(key);
     toUpdate[1].push(data[key]);
@@ -185,16 +175,6 @@ function saveProfileData (data) {
     'DB_Response': "Updated",
     'for_User' : response
   };
-
-  
-
-  }
-  else{
-   return {
-    'DB_Response': "Cant Process",
-    'for_User' : data.user_id
-  };
-}
 }
 
 /**
@@ -204,6 +184,9 @@ function processSearchForm (form_object) {
   return GetFromDB (buildDSQLQuery(form_object));
 }
 
+/**
+ * Creates SQL query from search form input.
+ */
 function buildDSQLQuery (params) {
   // always add "where C is not null" to the query to avoid getting inactive user IDs
   var query = 'select User_ID, Nickname, Age, Gender, Role, Friend_Count, Paid_Account, Locality, Region, Country, Avatar_URL, Sexual_Orientation, Interest_Level_Active, Looking_For, Number_of_Pictures, Number_of_Videos FROM UserData where Nickname is not null';
