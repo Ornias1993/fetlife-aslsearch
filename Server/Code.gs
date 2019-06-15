@@ -158,11 +158,10 @@ function saveProfileData (data) {
   
 
   //creates list of data to write away
-  var cols = [];
   for (var key in data) {
     //var col_name = CONFIG.Fields.headings_nicename[CONFIG.Fields.headings.indexOf(key)];
     console.log("Output: " + key + " " + data[key]);
-    UpdateToDB(data.user_id, key, data[key])
+    var response = UpdateToDB(data.user_id, key, data[key]);
     
 /**     
     cols.push(col_index);
@@ -176,8 +175,7 @@ function saveProfileData (data) {
   return {
     'status': "ok",
     'coords': {
-      'row': row_index,
-      'col': cols
+      'row': row_index
     }
   };
 

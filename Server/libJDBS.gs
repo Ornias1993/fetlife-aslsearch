@@ -66,19 +66,34 @@ function GetFromDB (query){
 }
 
 function UpdateToDB(id, col, key) {
-  if(key != "" && key != null){
-    var sql = "update UserData set " + col + "= \"" + key + "\" where User_ID= " + id;
+  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+  var start = new Date();
+  var stmt = conn.prepareStatement("update UserData set " + col + "= ? where user_id = ?");
+  
+  var send = "";
+
+  if(key != "" && key != null && !isNaN(parseFloat(key)) && isFinite(key)){
+    //send int
+    send = "int";
+    stmt.setInt(1, key);
+  }
+  else if (key != "" && key != null){
+   //send string
+   send = "string" + "'" + key + "'";
+   stmt.setString(1, "'" + key + "'");
   }
   else{
-    var sql = "update UserData set " + col + "= NULL where User_ID= " + id;
+    //send null
+    send = "null";
+    stmt.setString(1, null);
   }
-      
-    console.log("update attempt: " + sql);
-      var conn = Jdbc.getConnection(dbUrl, user, userPwd);
-      var start = new Date();
-      var stmt = conn.createStatement();
-      stmt.executeUpdate(sql);
-      
+    stmt.setInt(2, id);
+
+    console.log("update attempt: " + send);
+  
+    stmt.executeUpdate();
+    stmt.close();
+ return send
 
   }
 
