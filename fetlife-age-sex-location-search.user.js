@@ -267,6 +267,9 @@ FL_ASL.importHtmlString = function (html_string, selector) {
 //This contains the content in the tabs
 FL_ASL.attachSearchForm = function () {
     var html_string;
+    var gurl = (FL_ASL.CONFIG.debug)
+        ? FL_ASL.CONFIG.gasapp_url_development
+        : FL_ASL.CONFIG.gasapp_url;
     var user_loc = FL_ASL.ProfileScraper.getLocation(
         FL_ASL.importHtmlString(FL_ASL.getUserProfileHtml(), '#profile')
     );
@@ -290,8 +293,8 @@ FL_ASL.attachSearchForm = function () {
     html_string = '<br><div id="fetlife_asl_search_extended_wrapper">';
     html_string += '<script src="https://unpkg.com/@ungap/custom-elements-builtin"></script>'
     html_string += '<script type="module" src="https://unpkg.com/x-frame-bypass"></script>'
-    html_string += '<iframe is="x-frame-bypass" src="' + FL_ASL.CONFIG.gasapp_url.split('?')[0] + '" width="100%" height="500px"><h2><a href="' + FL_ASL.CONFIG.gasapp_url.split('?')[0] + '" target="_blank">Open Extended A/S/L Search</a></h2></iframe>';
-    html_string += '<h4><a href="' + FL_ASL.CONFIG.gasapp_url.split('?')[0] + '" target="_blank">Open Extended A/S/L Search in a seperate window</a></h4>'
+    html_string += '<iframe is="x-frame-bypass" src="' + FL_ASL.CONFIG.gasapp_url.split('?')[0] + '" width="100%" height="500px"><h2><a href="' + gurl + '" target="_blank">Open Extended A/S/L Search</a></h2></iframe>';
+    html_string += '<h4><a href="' + gurl + '" target="_blank">Open Extended A/S/L Search in a seperate window</a></h4>'
     html_string += '</div><!-- #fetlife_asl_search_extended_wrapper -->';
     var newdiv = container.appendChild(FL_ASL.createSearchTab('fetlife_asl_search_extended', html_string));
 
@@ -374,7 +377,7 @@ FL_ASL.ProfileScraper.getGender = function () {
     var x = $x('//h2/*[@class[contains(., "quiet")]]');
     var ret = '';
     if (x.length) {
-        y = x[0].textContent.match(/[^\d ]+/);
+        y = x[0].textContent.match(/[^\d ]/);
         if (y) {
             ret = y[0];
         }
@@ -697,7 +700,7 @@ FL_ASL.main = function () {
     var fl_profiles = [];
     var m;
     //Determine of we are on a scrapable page
-    if (m = window.location.pathname.match(/users\/[0-9]{1,10}$/)) {
+    if (m = window.location.pathname.match(/users\/(\d+)/)) {
         FL_ASL.log('Scraping profile ' + m[1]);
         fl_profiles.push(FL_ASL.scrapeProfile(m[1]));
     }
