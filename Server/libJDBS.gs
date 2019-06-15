@@ -104,7 +104,7 @@ function UpdateToDB(id, keys) {
   }
   else if (key != "" && key != null){
    //send string
-   stmt.setString(pos, "'" + key + "'");
+   stmt.setString(pos, key);
   }
   else{
     //send null
@@ -124,6 +124,65 @@ function UpdateToDB(id, keys) {
  return id
 
   }
+
+
+//id, col, key
+function InsertToDB(id, keys) {
+
+  
+  // Create a column to edit in the prepared statement for every entry in array
+  // Remove trailing spaces and comma
+  var cols = "";
+  var vals = "";
+  var index, len;
+  for (index = 0, len = keys[0].length; index < len; ++index) {
+  cols += keys[0][index] + ", "
+  vals += "?, "
+}
+  cols = cols.replace(/,\s*$/, "");
+  vals = vals.replace(/,\s*$/, "");
+
+  // Connect to database and create a prepared statement using the column string created earlier
+  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+  var start = new Date();
+  var stmt = conn.prepareStatement("INSERT INTO UserData (" + cols + ") VALUE (" + vals + ")");
+
+  
+  //For each entry in the array, calculate column position (index +1) and fill in the ? of the prepared statement
+  var index2, len2;
+  for (index2 = 0, len2 = keys[0].length; index2 < len2; ++index2) {
+  var send = "";
+  var pos = index2;
+  var key = keys[1][index2];
+  pos++;
+
+  //use setInt, setString and setNull respectively
+  if(key != "" && key != null && !isNaN(parseFloat(key)) && isFinite(key)){
+    //send int
+    stmt.setInt(pos, key);
+  }
+  else if (key != "" && key != null){
+   //send string
+   stmt.setString(pos, key);
+  }
+  else{
+    //send null
+    stmt.setString(pos, null);
+  }
+    
+}
+
+    //Execute and clossed
+    stmt.executeUpdate();
+    stmt.close();
+ // console.log("connclosed");
+
+ // return the ID of the processed user
+ console.log("Added to DB");
+ return id
+
+  }
+
 
 function mysql_real_escape_string (str) {
      return str

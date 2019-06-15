@@ -128,13 +128,38 @@ function doQuery (e) {
 function saveProfileData (data) {
 
   var row_index = GetFromDB ("SELECT User_ID FROM UserData where User_ID= " + data.user_id)
-//if not already here, dont update, add new
+  //if not already here, dont update, add new
   if (!row_index[1]) {
-    //create new row here
-    console.log("no such thing");
+  //create new row here
+  console.log("no such thing");
+    
+  //var range = sheet.getRange(row_index, 1);
+  //range.setValue(Date.now()); // update the last scrape time
+  
+  var toInsert = [[]];
+  toInsert.push([]);
+
+  //creates array of data to write away
+  for (var key in data) {
+    console.log("Output: " + key + " " + data[key]);
+    toInsert[0].push(key);
+    toInsert[1].push(data[key]);
+    
+    }
+    console.log("data in toInsert: " + toInsert[1][1]);
+  var response = InsertToDB(data.user_id, toInsert);
+    
+  return {
+    'DB_Response': "Added",
+    'for_User' : response
+  };
+
+    
+    
+    
   }
 
-  else {
+  else if (row_index[1]) {
 
   
     
@@ -157,18 +182,19 @@ function saveProfileData (data) {
   
 
    return {
-    'DB_update_status': "ok",
+    'DB_Response': "Updated",
     'for_User' : response
   };
 
   
 
   }
-  
+  else{
    return {
-    'DB_update_status': "Cant Process",
+    'DB_Response': "Cant Process",
     'for_User' : data.user_id
   };
+}
 }
 
 /**
