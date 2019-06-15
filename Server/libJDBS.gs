@@ -65,35 +65,63 @@ function GetFromDB (query){
   return resultsArray
 }
 
-function UpdateToDB(id, col, key) {
+
+//id, col, key
+function UpdateToDB(id, keys) {
+
+  
+  // Create a column to edit in the prepared statement for every entry in array
+  // Remove trailing spaces and comma
+  var cols = "";
+  var index, len;
+  for (index = 0, len = keys[0].length; index < len; ++index) {
+  cols += keys[0][index] + "= ?, "
+}
+  cols = cols.replace(/,\s*$/, "");
+
+  // Calculate position of the last ? in the prepared statement (user ID)
+  var idloc = keys[0].length;
+  idloc++;
+
+  // Connect to database and create a prepared statement using the column string created earlier
   var conn = Jdbc.getConnection(dbUrl, user, userPwd);
   var start = new Date();
-  var stmt = conn.prepareStatement("update UserData set " + col + "= ? where user_id = ?");
-  
-  var send = "";
+  var stmt = conn.prepareStatement("update UserData set " + cols + " where user_id = ?");
 
+  
+  //For each entry in the array, calculate column position (index +1) and fill in the ? of the prepared statement
+  var index2, len2;
+  for (index2 = 0, len2 = keys[0].length; index2 < len2; ++index2) {
+  var send = "";
+  var pos = index2;
+  var key = keys[1][index2];
+  pos++;
+
+  //use setInt, setString and setNull respectively
   if(key != "" && key != null && !isNaN(parseFloat(key)) && isFinite(key)){
     //send int
-    send = "int";
-    stmt.setInt(1, key);
+    stmt.setInt(pos, key);
   }
   else if (key != "" && key != null){
    //send string
-   send = "string" + "'" + key + "'";
-   stmt.setString(1, "'" + key + "'");
+   stmt.setString(pos, "'" + key + "'");
   }
   else{
     //send null
-    send = "null";
-    stmt.setString(1, null);
+    stmt.setString(pos, null);
   }
-    stmt.setInt(2, id);
+    
+}
+    //Set the Where user_id = ID part of the Query
+    stmt.setInt(idloc, id);
 
-    console.log("update attempt: " + send);
-  
+    //Execute and clossed
     stmt.executeUpdate();
     stmt.close();
- return send
+ // console.log("connclosed");
+
+ // return the ID of the processed user
+ return id
 
   }
 

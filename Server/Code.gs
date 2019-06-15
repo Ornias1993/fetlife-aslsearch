@@ -126,20 +126,6 @@ function doQuery (e) {
  * @return {Object}
  */
 function saveProfileData (data) {
-  /** Prepare cell values.
-  for (var key in data) {
-    if (data[key] instanceof Array) {
-      if (0 === data[key].length) { data[key] = ''; }
-      else {
-        // prepend an apostrophe to prevent Google Sheets from auto-formatting
-        data[key] = "'" + data[key].join(',');
-      }
-    }
-  }*/
-
-  // Lookup the destination coordinates of the data POST'ed to us.
-  // TODO: Can this be optimized without losing per-cell precision?
-  
 
   var row_index = GetFromDB ("SELECT User_ID FROM UserData where User_ID= " + data.user_id)
 //if not already here, dont update, add new
@@ -156,30 +142,33 @@ function saveProfileData (data) {
   //var range = sheet.getRange(row_index, 1);
   //range.setValue(Date.now()); // update the last scrape time
   
-
+  var toUpdate = [[]];
+  toUpdate.push([]);
   //creates list of data to write away
   for (var key in data) {
     //var col_name = CONFIG.Fields.headings_nicename[CONFIG.Fields.headings.indexOf(key)];
     console.log("Output: " + key + " " + data[key]);
-    var response = UpdateToDB(data.user_id, key, data[key]);
+    toUpdate[0].push(key);
+    toUpdate[1].push(data[key]);
     
-/**     
-    cols.push(col_index);
-
-    range = sheet.getRange(row_index, col_index);
-    range.setValue(data[key]);
-     */ 
     }
-
+    console.log("data in toUpdate: " + toUpdate[1][1]);
+  var response = UpdateToDB(data.user_id, toUpdate);
   
-  return {
-    'status': "ok",
-    'coords': {
-      'row': row_index
-    }
+
+   return {
+    'DB_update_status': "ok",
+    'for_User' : response
   };
 
+  
+
   }
+  
+   return {
+    'DB_update_status': "Cant Process",
+    'for_User' : data.user_id
+  };
 }
 
 /**
