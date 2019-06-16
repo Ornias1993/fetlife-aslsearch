@@ -18,11 +18,16 @@ var server = app.listen(8081, function(){
 
 app.get('/query', function(request, response)
 {
-    console.log(request.query);
-    libParse.processSearchForm(request.query);
+    console.log("request: " + request.query);
+    var output = libParse.processSearchForm(request.query);
+    console.log("output: " + output);
+    json = JSON.stringify(output);
+    var response = json;
+    console.log("response: " + response);
+    console.log("json is " + encodeURIComponent(json));
     response.setHeader('Content-Type', 'application/json');
         response.send(JSON.stringify({
-            message: 'No request sent'
+            message: response
         }));
 });
 

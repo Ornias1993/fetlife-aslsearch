@@ -24,56 +24,43 @@ module.exports = {
  */
 
 GetFromDB: function  (query){
-console.log("Prosessing query: " + query);
-var fields
-var result;
+var start = new Date();
+console.log("Searching for: " + query);
   con.connect(function(err) {
     if (err) throw err;
     con.query(query, function (err, result, fields) {
       if (err) throw err;
-      
-
-  console.log(fields);
-  console.log(result);
-/** 
-  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
-
-  var start = new Date();
-  var stmt = conn.createStatement();
-  stmt.setMaxRows(500);
-  console.log("Searching for: " + query);
-  var results = stmt.executeQuery(query);
-  var meta = results.getMetaData();
-  var numCols = meta.getColumnCount();
-
+    
   var resultsArray = [[]];
+  //fill first entry in array with colomn names
+  Object.keys(fields).forEach(function(key) {
+    // Do stuff with name
+    resultsArray[0].push(fields[key].name);
+  });
 
-  // The column count starts from 1
-  for (var i = 1; i <= numCols; i++ ) {
-  // Do stuff with name
-  resultsArray[0].push(meta.getColumnName(i));
-  }
-
-  var count = 1;
-  while(results.next()) {
+    var count = 1;
+    Object.keys(result).forEach(function(key) {
+      // Do stuff with name
       resultsArray.push([]);
-      for (var i = 1; i <= numCols; i++)
-        if(results.getString(i) != null) {
-          resultsArray[count].push(results.getString(i));
+
+      resultsArray[0].forEach(function(element) {
+        if(result[key][element] != null) {
+          resultsArray[count].push(result[key][element]);
         }
         else {
         resultsArray[count].push("");
         } 
-      count++;
+        
+      });
+      count++
 
+    });
 
-  }
-  results.close();
-  stmt.close();
 
   var end = new Date();
-  Logger.log('Time elapsed: %sms', end - start); */
-  return //resultsArray
+  console.log('Time elapsed: %sms', end - start);
+  console.log("SQLOUT: " + resultsArray[0]);
+  return resultsArray
 });
 });
 },

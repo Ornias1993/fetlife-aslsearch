@@ -84,7 +84,8 @@ function request(url) {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
        // Code here for the server answer when successful
-       console.log("Get Successfull");
+       console.log("Get Successfull: " + xhr.response);
+      // handleSearchSuccess(xhr.response);
       } else {
        // Code here for the server answer when not successful
        console.log("Get FAILED");

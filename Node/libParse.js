@@ -13,8 +13,10 @@ module.exports = {
  
   processSearchForm: function  (form_object) {
     console.log("Parsing: " + form_object);
+    var response = libSQL.GetFromDB(buildSQLQuery(form_object))
+    console.log("test: " + response);
 
-    return libSQL.GetFromDB (buildSQLQuery(form_object));
+    return response
   },
 
   processScrapeResult: function  (scrap_object) {
