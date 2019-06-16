@@ -37,9 +37,12 @@ app.post('/scraper', function(request, response){
       var feedback = "Recieved " + profiles.length + " scraped users to Process."
       for (var profile in profiles) {
       const processed = libPOST.validateScraperInput(profiles[profile]);
+      console.log(processed);
+      console.log(processed.user_id);
 
 
     // check if userentry already exists
+    if(processed && processed.user_id){
     var query = "SELECT user_id FROM UserData where user_id= " + processed.user_id;
     db.query(query, function (err, result, fields) {
         if (err) {
@@ -55,17 +58,17 @@ if (result.length == 0) {
     libPOST.requestInsert(processed);
     output = {
         'DB_Response': "Inserted new user",
-        'for_User' : result[0].user_id
+        'for_User' : processed.user_id
       };
     }
   
     else if (result.length == 1) {
     //var update = requestUpdate(data);
     console.log("updating");
-    libPOST.requestUpdate(processed);
+    libPOST.requestUpdate(result[0].user_id, processed);
     output = {
         'DB_Response': "Updated user",
-        'for_User' : result[0].user_id
+        'for_User' : processed.user_id
       };
 
     }
@@ -73,7 +76,7 @@ if (result.length == 0) {
     else{
      output = {
       'DB_Response': "Cant Process",
-      'for_User' : result[0].user_id
+      'for_User' : processed.user_id
     };
     
   }
@@ -85,7 +88,7 @@ if (result.length == 0) {
 }
 console.log(feedback);
 response.status(200).end(JSON.stringify(feedback));
-});
+}});
 
 app.get('/query', function(request, response)
 {
