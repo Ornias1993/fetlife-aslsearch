@@ -123,8 +123,8 @@ function handleSearchSuccess (results) {
   var columns = [];
   results[0].forEach(function (col_name) {
     var cell_funcs_map = {
-      'Nickname' : linkify,
-      'Avatar URL': buildLinkToFetLife
+      'nickname' : buildLinkToFetLife,
+      'avatar_url': linkify
     };
     var c = {
       'title': col_name,
@@ -152,13 +152,12 @@ function handleSearchSuccess (results) {
     function buildLinkToFetLife (td, cellData, rowData, row, col) {
       var html = '';
       html += '<a href="https://fetlife.com/users/' + rowData[0] + '" target="_blank">';
-      // Hidden due to not working (fetlife checks referer header), dont want them to log 403 errors and ban people
-      //html += '<img src="' + rowData[10] + '" alt="" class="img-rounded" /><div class="text-center">' + cellData + '</div>';
-      html += + cellData + '</a>';
+      html += '<img src="' + rowData[10] + '" alt="" class="img-rounded" /><div class="text-left">' + cellData + '</div>';
+      html += '</a>';
       jQuery(td).html(html);
     }
     function linkify (td, cellData, rowData, row, col) {
-      jQuery(td).html('<a href="https://fetlife.com/users/' + rowData[0] + '" target="_blank">' + cellData + '</a>');
+      jQuery(td).html('<a href=' + rowData[10] + '"target="_blank">' + cellData + '</a>');
     }
     
   });
