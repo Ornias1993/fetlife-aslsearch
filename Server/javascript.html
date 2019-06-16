@@ -24,9 +24,15 @@ jQuery(document).ready(function () {
     jQuery('#search-form header, #search-form section').each(function () {
       jQuery(this).slideUp();
     });
+    var form = document.getElementById('search-form');
+    const formEntries = new FormData(form).entries();
+    var json = Object.assign(...Array.from(formEntries, ([x,y]) => ({[x]:y})));
+    json = JSON.stringify(json);
+    console.log("json is " + encodeURIComponent(json));
+    //request(https://script.google.com/macros/s/AKfycbzX5EByRVtAoFJYKYLo8oz-se8aZk4S4erBc1CUWhPkJPzjmfMl/exec);
     google.script.run
       .withSuccessHandler(handleSearchSuccess)
-      .processSearchForm(document.getElementById('search-form'));
+      .processSearchForm(json);
   });
 
   jQuery('#search-form select[name="user[type]"]').on('change', function () {
@@ -75,6 +81,28 @@ jQuery(document).ready(function () {
     });
   });
 });
+
+
+// URL to be send via get and wait for response
+
+function request(url) {
+  const xhr = new XMLHttpRequest();
+  xhr.timeout = 2000;
+  xhr.onreadystatechange = function(e) {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+       // Code here for the server answer when successful
+      } else {
+       // Code here for the server answer when not successful
+      }
+    }
+  }
+  xhr.ontimeout = function () {
+    // Well, it took to long do some code here to handle that
+  }
+  xhr.open('get', url, true)
+  xhr.send();
+}
 
 //Behaviour of reset button
 function resetSearchForm () {
