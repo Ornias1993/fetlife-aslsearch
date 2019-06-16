@@ -1,11 +1,3 @@
-/**
- * Checks the data we received from the scraper to make sure it is as valid as can be.
- *
- * @param {object} obj Scraped input data.
- * @return {object} Filtered input with unsanitized or invalid inputs removed.
- */
-
-var libSQL = require('./libSQL');
 module.exports = {
     /**
    * Handler for the main search form.
@@ -16,131 +8,43 @@ module.exports = {
     var response = buildSQLQuery(form_object)
     return response
   },
-
-  processScrapeResult: function  (scrap_object) {
-    console.log("Scrape Parsing: " + scrape_object);
-
-    return "some output";
+  processSearchQuery: function  (rawFields, rawResults) {
+    console.log("processsing: " + rawResults);
+    var processed = arrayGen(rawFields, rawResults);
+    return processed
   }
+
+
 };
-  
-function validateScraperInput (obj) {
-    var safe_obj = {};
-    
-    for (var k in obj) {
-      if(typeof obj[k] == 'string'){
-        mysql_real_escape_string(obj[k]);
-      } 
-      
-      switch (k) {
-        case 'user_id':
-        case 'age':
-        case 'friend_count':
-        case 'num_pics':
-        case 'num_vids':
-          safe_obj[k] = parseInt(obj[k]);
-          break;
-        case 'paid_account':
-          if ('boolean' === typeof(obj[k])) {
-            safe_obj[k] = obj[k];
-          } else {
-            debugLog('WARNING: Expected boolean value in ' + obj[k]);
-          }
-          break;
-        case 'avatar_url':
-          if (obj[k].match(/^https:\/\/pic[0-9]*\.fetlife\.com/)) {
-            safe_obj[k] = obj[k];
-          }
-          break;
-        default:
-          // TODO: Stricter?
-          if (-1 !== CONFIG.Fields.headings.indexOf(k)) {
-            safe_obj[k] = obj[k];
-          }
-          break;
-      }
-    }
-    return safe_obj;
-  }
 
-  
-  /**
-   * Adds data the Database.
-   *
-   * @param {Object} data An object with named properties.
-   * @return {Object}
-   */
-    function saveProfileData (data) {
-    // check if userentry already exists
-    var row_index = GetFromDB ("SELECT User_ID FROM UserData where User_ID= " + data.user_id)
+function arrayGen (rawFields, rawResults){
+    var resultsArray = [[]];
+      //fill first entry in array with colomn names
+      Object.keys(rawFields).forEach(function(key) {
+        // Do stuff with name
+        resultsArray[0].push(rawFields[key].name);
+      });
     
-    //if not already here, dont update, add new
-    if (!row_index[1]) {
-    var insert = requestInsert(data);
-    return insert
-    }
-  
-    else if (row_index[1]) {
-    var update = requestUpdate(data);
-    return update
-    }
-  
-    else{
-     return {
-      'DB_Response': "Cant Process",
-      'for_User' : data.user_id
-    };
-  }
-  }
-  
-  /**
-   * Creates an Array from scraperdata to send to SQL Insert processor
-   */
-  
-  function requestInsert (data){
-    var toInsert = [[]];
-    toInsert.push([]);
-  
-    //creates array of data to write away
-    for (var key in data) {
-      toInsert[0].push(key);
-      toInsert[1].push(data[key]);
-      
-      }
-    var response = InsertToDB(data.user_id, toInsert);
-      
-    return {
-      'DB_Response': "Added",
-      'for_User' : response
-    };
-  }
-  
-  
-  /**
-   * Creates an Array from scraperdata to send to SQL Update processor
-   */
-  
-  function requestUpdate (data){
-    var toUpdate = [[]];
-    toUpdate.push([]);
-    //creates list of data to write away
-    for (var key in data) {
-      toUpdate[0].push(key);
-      toUpdate[1].push(data[key]);
-      
-      }
-    var response = UpdateToDB(data.user_id, toUpdate);
+        var count = 1;
+        Object.keys(rawResults).forEach(function(key) {
+          // Do stuff with name
+          resultsArray.push([]);
     
-  
-     return {
-      'DB_Response': "Updated",
-      'for_User' : response
-    };
-  }
-  
+          resultsArray[0].forEach(function(element) {
+            if(rawResults[key][element] != null) {
+              resultsArray[count].push(rawResults[key][element]);
+            }
+            else {
+            resultsArray[count].push("");
+            } 
+          });
+          count++
+    
+        });
+return resultsArray
+}
 
-  
-  /**
+/**
    * Creates SQL query from search form input.
    */
   function buildSQLQuery (params) {

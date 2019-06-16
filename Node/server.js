@@ -2,18 +2,11 @@ var express = require("express");
 
 var app = express();
 var libParse = require('./libParse');
-var mysql = require('mysql');
+var libGET = require('./libGET');
 
-var con = mysql.createConnection({
-    host: "sql7.freesqldatabase.com",
-    user: "sql7295537",
-    password: "8mI76qvWm6",
-    database: "sql7295537"
-  });
-  con.connect(function(err) {
-    if (err) {
-        throw err;
-    }
+var config = require('./config.json');
+var db = require('./db');
+var libPOST = require('./libPOST');
 
 app.use(express.static('public'));
 
@@ -22,52 +15,103 @@ app.use('/css', express.static(__dirname + '/public/css'));
 app.use('/js', express.static(__dirname + '/public/js'));
 app.use('/images', express.static(__dirname + '/public/images'));
 
-var server = app.listen(8081, function(){
+var server = app.listen(config.Port, function(){
     var port = server.address().port;
     console.log("Server started at http://localhost:%s", port);
+
+
+
+// Parse URL-encoded bodies (as sent by HTML forms)
+app.use(express.urlencoded());
+
+// Parse JSON bodies (as sent by API clients)
+app.use(express.json());
+
+// Access the parse results as request.body
+app.post('/scraper', function(request, response){
+
+    var profiles = JSON.parse(request.body.post_data);
+    
+    
+    if (!(profiles instanceof Array)) {
+        profiles = [profiles];
+      }
+      var feedback = "Recieved " + profiles.length + " scraped users to Process."
+      for (var profile in profiles) {
+      const processed = libPOST.validateScraperInput(profiles[profile]);
+
+
+    // check if userentry already exists
+    var query = "SELECT user_id FROM UserData where user_id= " + processed.user_id;
+    db.query(query, function (err, result, fields) {
+        if (err) {
+            throw err;
+            response.status(400).end('Error in database operation');
+        }
+else{
+
+//if not already here, dont update, add new
+if (result.length == 0) {
+    //var insert = requestInsert(data);
+    console.log("inserting");
+    libPOST.requestInsert(processed);
+    output = {
+        'DB_Response': "Inserted new user",
+        'for_User' : result[0].user_id
+      };
+    }
+  
+    else if (result.length == 1) {
+    //var update = requestUpdate(data);
+    console.log("updating");
+    libPOST.requestUpdate(processed);
+    output = {
+        'DB_Response': "Updated user",
+        'for_User' : result[0].user_id
+      };
+
+    }
+  
+    else{
+     output = {
+      'DB_Response': "Cant Process",
+      'for_User' : result[0].user_id
+    };
+    
+  }
+  console.log(output);
+}
+
 });
 
+}
+console.log(feedback);
+response.status(200).end(JSON.stringify(feedback));
+});
 
 app.get('/query', function(request, response)
 {
     var query = libParse.processSearchForm(request.query);
     var start = new Date();
     console.log("Searching for: " + query);
-        con.query(query, function (err, result, fields) {
+        db.query(query, function (err, result, fields) {
           if (err) {
               throw err;
               response.status(400).send('Error in database operation');
           }
-      var resultsArray = [[]];
-      //fill first entry in array with colomn names
-      Object.keys(fields).forEach(function(key) {
-        // Do stuff with name
-        resultsArray[0].push(fields[key].name);
-      });
-    
-        var count = 1;
-        Object.keys(result).forEach(function(key) {
-          // Do stuff with name
-          resultsArray.push([]);
-    
-          resultsArray[0].forEach(function(element) {
-            if(result[key][element] != null) {
-              resultsArray[count].push(result[key][element]);
-            }
-            else {
-            resultsArray[count].push("");
-            } 
-          });
-          count++
-    
-        });
-      var end = new Date();
-      console.log('Search sompleted, Time elapsed: %sms', end - start);
-      //console.log("json is " + encodeURIComponent(json));
+          else{
+      var searchResults = libGET.processSearchQuery(fields, result) ;
+
+
+          var end = new Date();
+          console.log('Search sompleted, Time elapsed: %sms', end - start);
+          //console.log("json is " + encodeURIComponent(json));
       response.setHeader('Content-Type', 'application/json');
           response.send(
-            resultsArray
+            searchResults
+          
           );
+          }
   });
     });
     });
