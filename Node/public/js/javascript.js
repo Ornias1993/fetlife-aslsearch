@@ -22,9 +22,6 @@ jQuery(document).ready(function () {
     json = JSON.stringify(json);
     console.log("json is " + encodeURIComponent(json));
     request("http://localhost:8081/query?" + json);
-    //google.script.run
-    //  .withSuccessHandler(handleSearchSuccess)
-    //  .processSearchForm(json);
   });
 
   jQuery('#search-form select[name="user[type]"]').on('change', function () {
@@ -76,7 +73,6 @@ jQuery(document).ready(function () {
 
 
 // URL to be send via get and wait for response
-
 function request(url) {
   const xhr = new XMLHttpRequest();
   xhr.timeout = 2000;
@@ -85,7 +81,9 @@ function request(url) {
       if (xhr.status === 200) {
        // Code here for the server answer when successful
        console.log("Get Successfull: " + xhr.response);
-      // handleSearchSuccess(xhr.response);
+       cleanjson = JSON.parse(xhr.response)
+       console.log("Get cleaned: " + cleanjson[0]);
+       handleSearchSuccess(cleanjson);
       } else {
        // Code here for the server answer when not successful
        console.log("Get FAILED");
