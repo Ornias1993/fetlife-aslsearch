@@ -1,6 +1,7 @@
 var express = require("express");
 
 var app = express();
+var libParse = require('./libParse');
 
 app.use(express.static('public'));
 
@@ -18,8 +19,12 @@ var server = app.listen(8081, function(){
 app.get('/query', function(request, response)
 {
     console.log(request.query);
+    libParse.processSearchForm(request.query);
     response.setHeader('Content-Type', 'application/json');
         response.send(JSON.stringify({
             message: 'No request sent'
         }));
 });
+
+
+
