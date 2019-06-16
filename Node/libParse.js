@@ -7,8 +7,24 @@
 
 var libSQL = require('./libSQL');
 module.exports = {
+    /**
+   * Handler for the main search form.
+   */
+ 
+  processSearchForm: function  (form_object) {
+    console.log("Parsing: " + form_object);
+
+    return libSQL.GetFromDB (buildSQLQuery(form_object));
+  },
+
+  processScrapeResult: function  (scrap_object) {
+    console.log("Scrape Parsing: " + scrape_object);
+
+    return "some output";
+  }
+};
   
-    validateScraperInput: function  (obj) {
+function validateScraperInput (obj) {
     var safe_obj = {};
     
     for (var k in obj) {
@@ -45,7 +61,7 @@ module.exports = {
       }
     }
     return safe_obj;
-  },
+  }
 
   
   /**
@@ -54,7 +70,7 @@ module.exports = {
    * @param {Object} data An object with named properties.
    * @return {Object}
    */
-    saveProfileData: function  (data) {
+    function saveProfileData (data) {
     // check if userentry already exists
     var row_index = GetFromDB ("SELECT User_ID FROM UserData where User_ID= " + data.user_id)
     
@@ -75,13 +91,13 @@ module.exports = {
       'for_User' : data.user_id
     };
   }
-  },
+  }
   
   /**
    * Creates an Array from scraperdata to send to SQL Insert processor
    */
   
-  requestInsert: function (data){
+  function requestInsert (data){
     var toInsert = [[]];
     toInsert.push([]);
   
@@ -97,14 +113,14 @@ module.exports = {
       'DB_Response': "Added",
       'for_User' : response
     };
-  },
+  }
   
   
   /**
    * Creates an Array from scraperdata to send to SQL Update processor
    */
   
-  requestUpdate: function (data){
+  function requestUpdate (data){
     var toUpdate = [[]];
     toUpdate.push([]);
     //creates list of data to write away
@@ -120,22 +136,14 @@ module.exports = {
       'DB_Response': "Updated",
       'for_User' : response
     };
-  },
+  }
   
-  /**
-   * Handler for the main search form.
-   */
-  processSearchForm: function  (form_object) {
-    console.log("Parsing: " + form_object);
-    libSQL.test();
 
-    return //GetFromDB (buildDSQLQuery(form_object));
-  },
   
   /**
    * Creates SQL query from search form input.
    */
-  buildDSQLQuery: function  (params) {
+  function buildSQLQuery (params) {
     // always add "where C is not null" to the query to avoid getting inactive user IDs
     var query = 'select user_id, nickname, age, gender, role, friend_count, paid_account, location_locality, location_region, location_country, avatar_url, sexual_orientation, interest_level, looking_for, num_pics, num_vids FROM UserData where nickname is not null';
     for (var x in params) {
@@ -299,8 +307,7 @@ module.exports = {
         }
       }
     }
-    Logger.log('Built query: ' + query);
+    query += " LIMIT 30"; 
+    console.log('Built query: ' + query);
     return query;
-  },
-
-};
+  }

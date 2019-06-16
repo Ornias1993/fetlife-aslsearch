@@ -20,20 +20,22 @@ var con = mysql.createConnection({
 
 module.exports = {
 /**
- * Read up to 1000 rows of data from the table and log them.
+ * Read up to 500 rows of data from the table and log them.
  */
 
- test: function() {
+GetFromDB: function  (query){
+console.log("Prosessing query: " + query);
+var fields
+var result;
   con.connect(function(err) {
     if (err) throw err;
-    con.query("SELECT COUNT(*) FROM UserData", function (err, result, fields) {
+    con.query(query, function (err, result, fields) {
       if (err) throw err;
-      console.log(result);
-    });
-  });
- },
+      
 
-GetFromDB: function  (query){
+  console.log(fields);
+  console.log(result);
+/** 
   var conn = Jdbc.getConnection(dbUrl, user, userPwd);
 
   var start = new Date();
@@ -70,8 +72,10 @@ GetFromDB: function  (query){
   stmt.close();
 
   var end = new Date();
-  Logger.log('Time elapsed: %sms', end - start);
-  return resultsArray
+  Logger.log('Time elapsed: %sms', end - start); */
+  return //resultsArray
+});
+});
 },
 
 
