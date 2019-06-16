@@ -1,9 +1,7 @@
 var express = require("express");
 
 var app = express();
-var libParse = require('./libParse');
 var libGET = require('./libGET');
-
 var config = require('./config.json');
 var db = require('./db');
 var libPOST = require('./libPOST');
